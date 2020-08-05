@@ -980,6 +980,7 @@ function ulx.nextround( calling_ply, target_plys, next_round )
 					PlysMarkedForInnocent[ID] = true
 					table.insert(affected_plys, v)
 				end
+			end
 			if next_round == "emt" then
 				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
 					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
