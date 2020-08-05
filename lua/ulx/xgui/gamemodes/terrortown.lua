@@ -143,13 +143,13 @@ local gppnl = xlib.makelistlayout{ w=415, h=318, parent=xgui.null }
 
 -- Roles Enabled
 local gptreclp = vgui.Create("DCollapsibleCategory", gppnl)
-gptreclp:SetSize(390, 250)
+gptreclp:SetSize(390, 225)
 gptreclp:SetExpanded(1)
 gptreclp:SetLabel("Roles Enabled")
 
 local gptrelst = vgui.Create("DPanelList", gptreclp)
 gptrelst:SetPos(5, 25)
-gptrelst:SetSize(390, 250)
+gptrelst:SetSize(390, 2225)
 gptrelst:SetSpacing(5)
 
 local hasmer = xlib.makecheckbox { label = "ttt_mercenary_enabled (def. 1)", repconvar = "rep_ttt_mercenary_enabled", parent = gptrelst }
@@ -182,7 +182,7 @@ gptrelst:AddItem(hasas)
 local haskil = xlib.makecheckbox { label = "ttt_killer_enabled (def. 1)", repconvar = "rep_ttt_killer_enabled", parent = gptrelst }
 gptrelst:AddItem(haskil)
 
-local asemt = xlib.makecheckbox { label = "ttt_emt_enabled (def. 1)", repconvar = "rep_ttt_emt_enabled", parent = gptrelst }
+local hasemt = xlib.makecheckbox { label = "ttt_emt_enabled (def. 1)", repconvar = "rep_ttt_emt_enabled", parent = gptrelst }
 gptrelst:AddItem(hasemt)
 
 
@@ -294,13 +294,13 @@ gptrdlst:AddItem(echance)
 
 -- Role Configs
 local gptrcfgclp = vgui.Create("DCollapsibleCategory", gppnl)
-gptrcfgclp:SetSize(390, 500)
+gptrcfgclp:SetSize(390, 75)
 gptrcfgclp:SetExpanded(0)
 gptrcfgclp:SetLabel("Role Configs")
 
 local gptrcfglst = vgui.Create("DPanelList", gptrcfgclp)
 gptrcfglst:SetPos(5, 25)
-gptrcfglst:SetSize(390, 500)
+gptrcfglst:SetSize(390, 75)
 gptrcfglst:SetSpacing(5)
 
 local dsearch = xlib.makecheckbox { label = "ttt_detective_search_only (def. 1)", repconvar = "rep_ttt_detective_search_only", parent = gptrcfglst }
