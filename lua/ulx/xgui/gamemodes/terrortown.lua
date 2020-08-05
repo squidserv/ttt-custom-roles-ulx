@@ -149,7 +149,7 @@ gptreclp:SetLabel("Roles Enabled")
 
 local gptrelst = vgui.Create("DPanelList", gptreclp)
 gptrelst:SetPos(5, 25)
-gptrelst:SetSize(390, 2225)
+gptrelst:SetSize(390, 225)
 gptrelst:SetSpacing(5)
 
 local hasmer = xlib.makecheckbox { label = "ttt_mercenary_enabled (def. 1)", repconvar = "rep_ttt_mercenary_enabled", parent = gptrelst }
@@ -188,13 +188,13 @@ gptrelst:AddItem(hasemt)
 
 --Role Counts
 local gptrcclp = vgui.Create("DCollapsibleCategory", gppnl)
-gptrcclp:SetSize(390, 325)
+gptrcclp:SetSize(390, 345)
 gptrcclp:SetExpanded(0)
 gptrcclp:SetLabel("Role Counts")
 
 local gptrclst = vgui.Create("DPanelList", gptrcclp)
 gptrclst:SetPos(5, 25)
-gptrclst:SetSize(390, 325)
+gptrclst:SetSize(390, 345)
 gptrclst:SetSpacing(5)
 
 local tmax = xlib.makeslider { label = "ttt_traitor_max (def. 32)", min = 1, max = 80, repconvar = "rep_ttt_traitor_max", parent = gptrclst }
@@ -294,13 +294,13 @@ gptrdlst:AddItem(echance)
 
 -- Role Configs
 local gptrcfgclp = vgui.Create("DCollapsibleCategory", gppnl)
-gptrcfgclp:SetSize(390, 75)
+gptrcfgclp:SetSize(390, 85)
 gptrcfgclp:SetExpanded(0)
 gptrcfgclp:SetLabel("Role Configs")
 
 local gptrcfglst = vgui.Create("DPanelList", gptrcfgclp)
 gptrcfglst:SetPos(5, 25)
-gptrcfglst:SetSize(390, 75)
+gptrcfglst:SetSize(390, 85)
 gptrcfglst:SetSpacing(5)
 
 local dsearch = xlib.makecheckbox { label = "ttt_detective_search_only (def. 1)", repconvar = "rep_ttt_detective_search_only", parent = gptrcfglst }
