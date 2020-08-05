@@ -1,35 +1,40 @@
---[=[-------------------------------------------------------------------------------------------
-║                              Trouble in Terrorist Town Commands                              ║
-║                                   By: Skillz and Bender180                                   ║
-║                              ╔═════════╗╔═════════╗╔═════════╗                               ║
-║                              ║ ╔═╗ ╔═╗ ║║ ╔═╗ ╔═╗ ║║ ╔═╗ ╔═╗ ║                               ║
-║                              ╚═╝ ║ ║ ╚═╝╚═╝ ║ ║ ╚═╝╚═╝ ║ ║ ╚═╝                               ║
-║──────────────────────────────────║ ║────────║ ║────────║ ║───────────────────────────────────║
-║──────────────────────────────────║ ║────────║ ║────────║ ║───────────────────────────────────║
-║──────────────────────────────────╚═╝────────╚═╝────────╚═╝───────────────────────────────────║
-║                  All code included is completely original or extracted                       ║
-║            from the base ttt files that are provided with the ttt gamemode.                  ║
-║                                                                                              ║
----------------------------------------------------------------------------------------------]=]
 local CATEGORY_NAME  = "TTT Admin"
 local gamemode_error = "The current gamemode is not trouble in terrorist town!"
-
-
 
 --[Ulx Completes]------------------------------------------------------------------------------
 ulx.target_role = {}
 function updateRoles()
 	table.Empty( ulx.target_role )
 	    
-    table.insert(ulx.target_role,"traitor")
-    table.insert(ulx.target_role,"detective")
-    table.insert(ulx.target_role,"innocent")
+	table.insert(ulx.target_role, "innocent") -- Add "innocent" to the table.
+	table.insert(ulx.target_role, "traitor") -- Add "traitor" to the table.
+	table.insert(ulx.target_role, "detective") -- Add "detective" to the table.
+	table.insert(ulx.target_role, "mercenary") -- Add "mercenary" to the table.
+	table.insert(ulx.target_role, "hypnotist") -- Add "hypnotist" to the table.
+	table.insert(ulx.target_role, "glitch") -- Add "glitch" to the table.
+	table.insert(ulx.target_role, "jester") -- Add "jester" to the table.
+	table.insert(ulx.target_role, "phantom") -- Add "phantom" to the table.
+	table.insert(ulx.target_role, "zombie") -- Add "zombie" to the table.
+	table.insert(ulx.target_role, "vampire") -- Add "vampire" to the table.
+	table.insert(ulx.target_role, "swapper") -- Add "swapper" to the table.
+	table.insert(ulx.target_role, "assassin") -- Add "assassin" to the table.
+	table.insert(ulx.target_role, "killer") -- Add "killer" to the table.
+	table.insert(ulx.target_role, "emt") -- Add "emt" to the table
 end
 hook.Add( ULib.HOOK_UCLCHANGED, "ULXRoleNamesUpdate", updateRoles )
 updateRoles()
+																							   
+
+ulx.modifiers = {
+	"Team Deathmatch",
+	"H.U.G.E Problem",
+	"Sudden Death",
+	"The Ol' Switcheroo",
+	"Zombie Apocalypse",
+	"Juggernaut",
+	"Remove All"
+}
 --[End]----------------------------------------------------------------------------------------
-
-
 
 --[Global Helper Functions][Used by more than one command.]------------------------------------
 --[[send_messages][Sends messages to player(s)]
@@ -85,9 +90,139 @@ function corpse_identify(corpse)
 end
 --[End]----------------------------------------------------------------------------------------
 
+--[Round Modifier]---------------------------------------------------------------------------------
+--[[ulx.roundmodifier][Applies a round modifier to the next round.]
+@param  {[PlayerObject]} calling_ply   [The player who used the command.]
+@param  {[Number]}       modifier      [The modifier that will be applied to the next round.]
+--]]
+function ulx.roundmodifier(calling_ply, modifier)
+	if not GetConVarString("gamemode") == "terrortown" then ULib.tsayError(calling_ply, gamemode_error, true) else
+		
+		if modifier == "Team Deathmatch" then
+			hook.Add("TTTSelectRoles", "Round_Modifier_Deathmatch", function()
+				local tdmChoices = {}
+				local plyCount = 0
+				for i, v in pairs(player.GetAll()) do
+					table.insert(tdmChoices, v)
+					plyCount = plyCount + 1
+					v:SetRole(ROLE_DETECTIVE)
+				end
+				local traitorCount = math.ceil(plyCount * 0.5)
+				local tp = 0
+				while tp < traitorCount do
+					local trapick = math.random(1, #tdmChoices)
+					local traply = tdmChoices[trapick]
+					traply:SetRole(ROLE_TRAITOR)
+					table.remove(tdmChoices, trapick)
+					tp = tp + 1
+				end
+				SendFullStateUpdate()
+			end)
+		elseif modifier == "H.U.G.E Problem" then
+			hook.Add("TTTBeginRound", "Round_Modifier_Huge_Problem", function()
+				for i, ply in pairs(player.GetAll()) do
+					for _, wep in pairs(ply:GetWeapons()) do
+						if wep.Kind == WEAPON_HEAVY then
+							ply:StripWeapon(wep:GetClass())
+						end
+					end
+					local huge = ply:Give("weapon_zm_sledge")
+					ply:GiveAmmo(300, "smg1", true)
+					huge.AllowDrop = false
+				end
+			end)
+		elseif modifier == "Sudden Death" then
+			hook.Add("TTTBeginRound", "Round_Modifier_Sudden_Death", function()
+				timer.Create("suddenDeath", 0.1, 0, function()
+					for i, ply in pairs(player.GetAll()) do
+						if ply:Health() > 1 then
+							ply:SetHealth(1)
+						end
+					end
+				end)
+			end)
+		elseif modifier == "The Ol' Switcheroo" then
+			hook.Add("TTTSelectRoles", "Round_Modifier_Switcheroo", function()
+				local carnivalChoices = {}
+				for i, v in pairs(player.GetAll()) do
+					table.insert(carnivalChoices, v)
+					v:SetRole(ROLE_SWAPPER)
+				end
+				
+				local trapick = math.random(1, #carnivalChoices)
+				local traply = carnivalChoices[trapick]
+				traply:SetRole(ROLE_TRAITOR)
+				table.remove(carnivalChoices, trapick)
+				traply:SetDefaultCredits()
+				
+				local detpick = math.random(1, #carnivalChoices)
+				local detply = carnivalChoices[detpick]
+				detply:SetRole(ROLE_DETECTIVE)
+				table.remove(carnivalChoices, detpick)
+				detply:SetDefaultCredits()
+				
+				SendFullStateUpdate()
+			end)
+		elseif modifier == "Zombie Apocalypse" then
+			hook.Add("TTTSelectRoles", "Round_Modifier_Zombie", function()
+				local zombieChoices = {}
+				local plyCount = 0
+				for i, v in pairs(player.GetAll()) do
+					table.insert(zombieChoices, v)
+					plyCount = plyCount + 1
+				end
+				local zombieCount = math.ceil(plyCount * GetConVar("ttt_zombie_pct"):GetFloat())
+				local zp = 0
+				while zp < zombieCount do
+					local zompick = math.random(1, #zombieChoices)
+					local zomply = zombieChoices[zompick]
+					zomply:SetRole(ROLE_ZOMBIE)
+					table.remove(zombieChoices, zompick)
+					zp = zp + 1
+				end
+				SendFullStateUpdate()
+			end)
+		elseif modifier == "Juggernaut" then
+			hook.Add("TTTSelectRoles", "Round_Modifier_Juggernaut", function()
+				local juggernautChoices = {}
+				local plyCount = 0
+				for i, v in pairs(player.GetAll()) do
+					table.insert(juggernautChoices, v)
+					v:SetRole(ROLE_TRAITOR)
+					v:SetDefaultCredits()
+					plyCount = plyCount + 1
+				end
+				
+				local jugpick = math.random(1, #juggernautChoices)
+				local jugply = juggernautChoices[jugpick]
+				jugply:SetRole(ROLE_DETECTIVE)
+				table.remove(juggernautChoices, jugpick)
+				jugply:SetDefaultCredits()
+				jugply:SetHealth((plyCount - 1) * 100)
+				
+				SendFullStateUpdate()
+			end)
+		elseif modifier == "Remove All" then
+			hook.Remove("TTTSelectRoles", "Round_Modifier_Deathmatch")
+			hook.Remove("TTTBeginRound", "Round_Modifier_Huge_Problem")
+			hook.Remove("TTTBeginRound", "Round_Modifier_Sudden_Death")
+			timer.Remove("suddenDeath")
+			hook.Remove("TTTSelectRoles", "Round_Modifier_Switcheroo")
+			hook.Remove("TTTSelectRoles", "Round_Modifier_Zombie")
+			hook.Remove("TTTSelectRoles", "Round_Modifier_Juggernaut")
+			ulx.fancyLogAdmin(calling_ply, false, "#A turned off all modifiers.")
+			return
+		else
+			return
+		end
+		ulx.fancyLogAdmin(calling_ply, false, "#A turned on the modifier #s.", modifier)
+	end
+end
 
-
-
+local roundmod = ulx.command(CATEGORY_NAME, "ulx roundmodifier", ulx.roundmodifier, "!roundmodifier")
+roundmod:addParam { type = ULib.cmds.StringArg, completes = ulx.modifiers, hint = "Modifier" }
+roundmod:defaultAccess(ULib.ACCESS_SUPERADMIN)
+roundmod:help("Turns round modifiers on.")
 --[Force role]---------------------------------------------------------------------------------
 --[[ulx.force][Forces <target(s)> to become a specified role.]
 @param  {[PlayerObject]} calling_ply   [The player who used the command.]
@@ -263,6 +398,12 @@ function ulx.force( calling_ply, target_plys, target_role, should_silent )
 
 		local affected_plys = {}
 		local starting_credits=GetConVarNumber("ttt_credits_starting")
+		local det_starting_credits = GetConVarNumber("ttt_det_credits_starting")
+		local mer_starting_credits = GetConVarNumber("ttt_mer_credits_starting")
+		local kil_starting_credits = GetConVarNumber("ttt_kil_credits_starting")
+		local assin_starting_credits = GetConVarNumber("ttt_assin_credits_starting")
+		local hypno_starting_credits = GetConVarNumber("ttt_hypno_credits_starting")
+		local vamp_starting_credits = GetConVarNumber("ttt_vamp_credits_starting")
 
 		local role
 		local role_grammar
@@ -270,7 +411,18 @@ function ulx.force( calling_ply, target_plys, target_role, should_silent )
 		local role_credits
 
 	    if target_role ==  "traitor"   or target_role == "t" then role, role_grammar, role_string, role_credits = ROLE_TRAITOR,   "a ",  "traitor",   starting_credits end
-	    if target_role ==  "detective" or target_role == "d" then role, role_grammar, role_string, role_credits = ROLE_DETECTIVE, "a ",  "detective", starting_credits end
+	    if target_role ==  "detective" or target_role == "d" then role, role_grammar, role_string, role_credits = ROLE_DETECTIVE, "a ",  "detective", det_starting_credits end
+		if target_role == "mercenary" or target_role == "m" then role, role_grammar, role_string, role_credits = ROLE_MERCENARY, "a ", "mercenary", mer_starting_credits end
+		if target_role == "hypnotist" or target_role == "h" then role, role_grammar, role_string, role_credits = ROLE_HYPNOTIST, "a ", "hypnotist", hypno_starting_credits end
+		if target_role == "glitch" or target_role == "g" then role, role_grammar, role_string, role_credits = ROLE_GLITCH, "a ", "glitch", 0 end
+		if target_role == "jester" or target_role == "j" then role, role_grammar, role_string, role_credits = ROLE_JESTER, "a ", "jester", 0 end
+		if target_role == "phantom" or target_role == "p" then role, role_grammar, role_string, role_credits = ROLE_PHANTOM, "a ", "phantom", 0 end
+		if target_role == "zombie" or target_role == "z" then role, role_grammar, role_string, role_credits = ROLE_ZOMBIE, "a ", "zombie", 0 end
+		if target_role == "vampire" or target_role == "v" then role, role_grammar, role_string, role_credits = ROLE_VAMPIRE, "a ", "vampire", vamp_starting_credits end
+		if target_role == "swapper" or target_role == "s" then role, role_grammar, role_string, role_credits = ROLE_SWAPPER, "a ", "swapper", 0 end
+		if target_role == "assassin" or target_role == "a" then role, role_grammar, role_string, role_credits = ROLE_ASSASSIN, "an ", "assassin", assin_starting_credits end
+		if target_role == "killer" or target_role == "k" then role, role_grammar, role_string, role_credits = ROLE_KILLER, "a ", "killer", kil_starting_credits end
+		if target_role == "emt" or target_role == "e" then role, role_grammar, role_string, role_credits = ROLE_KILLER, "an ", "emt", 0 end
 	    if target_role ==  "innocent"  or target_role == "i" then role, role_grammar, role_string, role_credits = ROLE_INNOCENT,  "an ", "innocent",  0                end
 	    
 	    for i=1, #target_plys do
@@ -300,8 +452,15 @@ function ulx.force( calling_ply, target_plys, target_role, should_silent )
 	            GiveLoadoutWeapons(v)
 
 	            table.insert( affected_plys, v )
-	        end
-	    end
+				
+				if target_role == "killer" or target_role == "k" then
+					v:SetMaxHealth(150)
+					v:SetHealth(150)
+				else
+					v:SetMaxHealth(100)
+					v:SetHealth(100)
+				end
+			end
 	    ulx.fancyLogAdmin( calling_ply, should_silent, "#A forced #T to become the role of " .. role_grammar .."#s.", affected_plys, role_string )
 	    send_messages(affected_plys, "Your role has been set to " .. role_string .. "." )
 	end
@@ -323,6 +482,17 @@ function GetLoadoutWeapons(r)
 	local tbl = {
 		[ROLE_INNOCENT] = {},
 		[ROLE_TRAITOR]  = {},
+		[ROLE_MERCENARY] = {},
+		[ROLE_HYPNOTIST] = {},
+		[ROLE_GLITCH] = {},
+		[ROLE_JESTER] = {},
+		[ROLE_PHANTOM] = {},
+		[ROLE_ZOMBIE] = {},
+		[ROLE_VAMPIRE] = {},
+		[ROLE_SWAPPER] = {},
+		[ROLE_ASSASSIN] = {},
+		[ROLE_KILLER] = {},
+		[ROLE_EMT] = {},
 		[ROLE_DETECTIVE]= {}
 	};
 	for k, w in pairs(weapons.GetList()) do
@@ -566,6 +736,32 @@ karma:defaultAccess( ULib.ACCESS_ADMIN )
 karma:help( "Changes the <target(s)> Karma." )
 --[End]----------------------------------------------------------------------------------------
 
+--[Drinks]--------------------------------------------------------------------------------------
+--[[ulx.drinks][Sets the <target(s)> drinks to a given amount.]
+@param  {[PlayerObject]} calling_ply [The player who used the command.]
+@param  {[PlayerObject]} target_plys [The player(s) who will have the effects of the command applied to them.]
+@param  {[Number]}       d      	 [The number the target's drinks will be set to.]
+@param  {[Number]}       s       	 [The number the target's shots will be set to.]
+--]]
+function ulx.drinks(calling_ply, target_plys, d, s)
+	if not GetConVarString("gamemode") == "terrortown" then ULib.tsayError(calling_ply, gamemode_error, true) else
+		for i = 1, #target_plys do
+			target_plys[i]:SetBaseDrinks(d)
+			target_plys[i]:SetLiveDrinks(d)
+			target_plys[i]:SetBaseShots(s)
+			target_plys[i]:SetLiveShots(s)
+		end
+	end
+	ulx.fancyLogAdmin(calling_ply, "#A set the drinks and shots for #T to #i and #i", target_plys, d, s)
+end
+
+local drinks = ulx.command(CATEGORY_NAME, "ulx drinks", ulx.drinks, "!drinks")
+drinks:addParam { type = ULib.cmds.PlayersArg }
+drinks:addParam { type = ULib.cmds.NumArg, min = 0, max = 100, default = 0, hint = "Drinks", ULib.cmds.optional, ULib.cmds.round }
+drinks:addParam { type = ULib.cmds.NumArg, min = 0, max = 100, default = 0, hint = "Shots", ULib.cmds.optional, ULib.cmds.round }
+drinks:defaultAccess(ULib.ACCESS_ADMIN)
+drinks:help("Changes the <target(s)> drinks.")
+--[End]----------------------------------------------------------------------------------------
 
 
 --[Toggle spectator]---------------------------------------------------------------------------
@@ -608,10 +804,22 @@ tttspec:help( "Forces the <target(s)> to/from spectator." )
 ulx.next_round = {}
 local function updateNextround()
 	table.Empty( ulx.next_round ) -- Don't reassign so we don't lose our refs
-    
-    table.insert(ulx.next_round,"traitor") -- Add "traitor" to the table.
-    table.insert(ulx.next_round,"detective") -- Add "detective" to the table.	
-    table.insert(ulx.next_round,"unmark") -- Add "unmark" to the table.
+	
+	table.insert(ulx.next_round, "innocent") -- Add "innocent" to the table.
+	table.insert(ulx.next_round, "traitor") -- Add "traitor" to the table.
+	table.insert(ulx.next_round, "detective") -- Add "detective" to the table.
+	table.insert(ulx.next_round, "mercenary") -- Add "mercenary" to the table.
+	table.insert(ulx.next_round, "hypnotist") -- Add "hypnotist" to the table.
+	table.insert(ulx.next_round, "glitch") -- Add "glitch" to the table.
+	table.insert(ulx.next_round, "jester") -- Add "jester" to the table.
+	table.insert(ulx.next_round, "phantom") -- Add "phantom" to the table.
+	table.insert(ulx.next_round, "zombie") -- Add "zombie" to the table.
+	table.insert(ulx.next_round, "vampire") -- Add "vampire" to the table.
+	table.insert(ulx.next_round, "swapper") -- Add "swapper" to the table.
+	table.insert(ulx.next_round, "assassin") -- Add "assassin" to the table.
+	table.insert(ulx.next_round, "killer") -- Add "killer" to the table.
+	table.insert(ulx.next_round, "emt") -- Add "emt" to the table.
+	table.insert(ulx.next_round, "unmark") -- Add "unmark" to the table.
 
 end
 hook.Add( ULib.HOOK_UCLCHANGED, "ULXNextRoundUpdate", updateNextround )
@@ -620,6 +828,18 @@ updateNextround() -- Init
 
 local PlysMarkedForTraitor = {}
 local PlysMarkedForDetective = {}
+local PlysMarkedForMercenary = {}
+local PlysMarkedForHypnotist = {}
+local PlysMarkedForGlitch = {}
+local PlysMarkedForJester = {}
+local PlysMarkedForPhantom = {}
+local PlysMarkedForZombie = {}
+local PlysMarkedForVampire = {}
+local PlysMarkedForSwapper = {}
+local PlysMarkedForAssassin = {}
+local PlysMarkedForKiller = {}
+local PlysMarkedForInnocent = {}
+local PlysMarkedForEMT = {}
 function ulx.nextround( calling_ply, target_plys, next_round )
     if not GetConVarString("gamemode") == "terrortown" then ULib.tsayError( calling_ply, gamemode_error, true ) else
         local affected_plys = {}
@@ -629,7 +849,7 @@ function ulx.nextround( calling_ply, target_plys, next_round )
             local ID = v:UniqueID()
         
             if next_round == "traitor" then
-                if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true then
+                if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
                     ULib.tsayError( calling_ply, "that player is already marked for the next round", true )
                 else
                     PlysMarkedForTraitor[ID] = true
@@ -637,13 +857,108 @@ function ulx.nextround( calling_ply, target_plys, next_round )
                 end
             end
             if next_round == "detective" then
-                if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true then
+                if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
                     ULib.tsayError( calling_ply, "that player is already marked for the next round!", true )
                 else
                     PlysMarkedForDetective[ID] = true
                     table.insert( affected_plys, v ) 
                 end
             end
+			if next_round == "mercenary" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForMercenary[ID] = true
+					table.insert(affected_plys, v)
+				end
+			end
+			if next_round == "hypnotist" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForHypnotist[ID] = true
+					table.insert(affected_plys, v)
+				end
+			end
+			if next_round == "glitch" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForGlitch[ID] = true
+					table.insert(affected_plys, v)
+				end
+			end
+			if next_round == "jester" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForJester[ID] = true
+					table.insert(affected_plys, v)
+				end
+			end
+			if next_round == "phantom" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForPhantom[ID] = true
+					table.insert(affected_plys, v)
+				end
+			end
+			if next_round == "zombie" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForZombie[ID] = true
+					table.insert(affected_plys, v)
+				end
+			end
+			if next_round == "vampire" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForVampire[ID] = true
+					table.insert(affected_plys, v)
+				end
+			end
+			if next_round == "swapper" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForSwapper[ID] = true
+					table.insert(affected_plys, v)
+				end
+			end
+			if next_round == "assassin" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForAssassin[ID] = true
+					table.insert(affected_plys, v)
+				end
+			end
+			if next_round == "killer" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForKiller[ID] = true
+					table.insert(affected_plys, v)
+				end
+			end
+			if next_round == "innocent" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForInnocent[ID] = true
+					table.insert(affected_plys, v)
+				end
+			if next_round == "emt" then
+				if PlysMarkedForTraitor[ID] == true or PlysMarkedForDetective[ID] == true or PlysMarkedForMercenary[ID] == true or PlysMarkedForHypnotist[ID] == true or PlysMarkedForGlitch[ID] == true or PlysMarkedForJester[ID] == true or PlysMarkedForPhantom[ID] == true or PlysMarkedForZombie[ID] == true or PlysMarkedForVampire[ID] == true or PlysMarkedForSwapper[ID] == true or PlysMarkedForAssassin[ID] == true or PlysMarkedForKiller[ID] == true or PlysMarkedForInnocent[ID] == true or PlysMarkedForEMT[ID] == true then
+					ULib.tsayError(calling_ply, "that player is already marked for the next round!", true)
+				else
+					PlysMarkedForEMT[ID] = true
+					table.insert(affected_plys, v)
+				end
+			end
             if next_round == "unmark" then
                 if PlysMarkedForTraitor[ID] == true then
                     PlysMarkedForTraitor[ID] = false
@@ -653,6 +968,54 @@ function ulx.nextround( calling_ply, target_plys, next_round )
                     PlysMarkedForDetective[ID] = false
                     table.insert( affected_plys, v )
                 end
+				if PlysMarkedForMercenary[ID] == true then
+					PlysMarkedForMercenary[ID] = false
+					table.insert(affected_plys, v)
+				end
+				if PlysMarkedForHypnotist[ID] == true then
+					PlysMarkedForHypnotist[ID] = false
+					table.insert(affected_plys, v)
+				end
+				if PlysMarkedForGlitch[ID] == true then
+					PlysMarkedForGlitch[ID] = false
+					table.insert(affected_plys, v)
+				end
+				if PlysMarkedForJester[ID] == true then
+					PlysMarkedForJester[ID] = false
+					table.insert(affected_plys, v)
+				end
+				if PlysMarkedForPhantom[ID] == true then
+					PlysMarkedForPhantom[ID] = false
+					table.insert(affected_plys, v)
+				end
+				if PlysMarkedForZombie[ID] == true then
+					PlysMarkedForZombie[ID] = false
+					table.insert(affected_plys, v)
+				end
+				if PlysMarkedForVampire[ID] == true then
+					PlysMarkedForVampire[ID] = false
+					table.insert(affected_plys, v)
+				end
+				if PlysMarkedForSwapper[ID] == true then
+					PlysMarkedForSwapper[ID] = false
+					table.insert(affected_plys, v)
+				end
+				if PlysMarkedForAssassin[ID] == true then
+					PlysMarkedForAssassin[ID] = false
+					table.insert(affected_plys, v)
+				end
+				if PlysMarkedForKiller[ID] == true then
+					PlysMarkedForKiller[ID] = false
+					table.insert(affected_plys, v)
+				end
+				if PlysMarkedForInnocent[ID] == true then
+					PlysMarkedForInnocent[ID] = false
+					table.insert(affected_plys, v)
+				end
+				if PlysMarkedForEMT[ID] == true then
+					PlysMarkedForEMT[ID] = false
+					table.insert(affected_plys, v)
+				end
             end
         end    
         
@@ -667,7 +1030,7 @@ local nxtr= ulx.command( CATEGORY_NAME, "ulx forcenr", ulx.nextround, "!nr" )
 nxtr:addParam{ type=ULib.cmds.PlayersArg }
 nxtr:addParam{ type=ULib.cmds.StringArg, completes=ulx.next_round, hint="Next Round", error="invalid role \"%s\" specified", ULib.cmds.restrictToCompletes }
 nxtr:defaultAccess( ULib.ACCESS_SUPERADMIN )
-nxtr:help( "Forces the target to be a detective/traitor in the following round." )
+nxtr:help( "Forces the target to be a role in the following round." )
 
 local function TraitorMarkedPlayers()
 	for k, v in pairs(PlysMarkedForTraitor) do
@@ -675,26 +1038,387 @@ local function TraitorMarkedPlayers()
 			ply = player.GetByUniqueID(k)
 			ply:SetRole(ROLE_TRAITOR)
             ply:AddCredits(GetConVarNumber("ttt_credits_starting"))
-			ply:ChatPrint("You have been made a traitor by an admin this round.")
 			PlysMarkedForTraitor[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
 		end
 	end
 end
-hook.Add("TTTBeginRound", "Admin_Round_Traitor", TraitorMarkedPlayers)
+hook.Add("TTTSelectRoles", "Admin_Round_Traitor", TraitorMarkedPlayers)
 
 local function DetectiveMarkedPlayers()
 	for k, v in pairs(PlysMarkedForDetective) do
 		if v then
 			ply = player.GetByUniqueID(k)
 			ply:SetRole(ROLE_DETECTIVE)
-            ply:AddCredits(GetConVarNumber("ttt_credits_starting"))
-            ply:Give("weapon_ttt_wtester")
-			ply:ChatPrint("You have been made a detective by an admin this round.")
+			ply:AddCredits(GetConVarNumber("ttt_det_credits_starting"))
 			PlysMarkedForDetective[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
 		end
 	end
 end
-hook.Add("TTTBeginRound", "Admin_Round_Detective", DetectiveMarkedPlayers)
+
+hook.Add("TTTSelectRoles", "Admin_Round_Detective", DetectiveMarkedPlayers)
+
+local function MercenaryMarkedPlayers()
+	for k, v in pairs(PlysMarkedForMercenary) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_MERCENARY)
+			ply:AddCredits(GetConVarNumber("ttt_det_credits_starting"))
+			PlysMarkedForMercenary[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_Mercenary", MercenaryMarkedPlayers)
+
+local function HypnotistMarkedPlayers()
+	for k, v in pairs(PlysMarkedForHypnotist) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_HYPNOTIST)
+			PlysMarkedForHypnotist[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+			ply:Give("weapon_hyp_brainwash")
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_Hypnotist", HypnotistMarkedPlayers)
+
+local function GlitchMarkedPlayers()
+	for k, v in pairs(PlysMarkedForGlitch) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_GLITCH)
+			PlysMarkedForGlitch[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_Glitch", GlitchMarkedPlayers)
+
+local function JesterMarkedPlayers()
+	for k, v in pairs(PlysMarkedForJester) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_JESTER)
+			PlysMarkedForJester[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_Jester", JesterMarkedPlayers)
+
+local function PhantomMarkedPlayers()
+	for k, v in pairs(PlysMarkedForPhantom) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_PHANTOM)
+			PlysMarkedForPhantom[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_Phantom", PhantomMarkedPlayers)
+
+local function ZombieMarkedPlayers()
+	for k, v in pairs(PlysMarkedForZombie) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_ZOMBIE)
+			PlysMarkedForZombie[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+			ply:Give("weapon_zom_claws")
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_Zombie", ZombieMarkedPlayers)
+
+local function VampireMarkedPlayers()
+	for k, v in pairs(PlysMarkedForVampire) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_VAMPIRE)
+			PlysMarkedForVampire[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+			ply:Give("weapon_vam_fangs")
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_Vampire", VampireMarkedPlayers)
+
+local function SwapperMarkedPlayers()
+	for k, v in pairs(PlysMarkedForSwapper) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_SWAPPER)
+			PlysMarkedForSwapper[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_Swapper", SwapperMarkedPlayers)
+
+local function AssassinMarkedPlayers()
+	for k, v in pairs(PlysMarkedForAssassin) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_ASSASSIN)
+			PlysMarkedForAssassin[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_Assassin", AssassinMarkedPlayers)
+
+local function KillerMarkedPlayers()
+	for k, v in pairs(PlysMarkedForKiller) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_KILLER)
+			ply:SetMaxHealth(150)
+			ply:SetHealth(150)
+			PlysMarkedForKiller[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_Killer", KillerMarkedPlayers)
+
+local function EMTMarkedPlayers()
+	for k, v in pairs(PlysMarkedForEMT) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_EMT)
+			ply:SetMaxHealth(100)
+			ply:SetHealth(100)
+			PlysMarkedForEMT[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+			ply:Give("weapon_vam_fangs")
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_EMT", EMTMarkedPlayers)
+
+local function InnocentMarkedPlayers()
+	for k, v in pairs(PlysMarkedForInnocent) do
+		if v then
+			ply = player.GetByUniqueID(k)
+			ply:SetRole(ROLE_INNOCENT)
+			PlysMarkedForPhantom[k] = false
+			if ply:HasWeapon("weapon_hyp_brainwash") then
+				ply:StripWeapon("weapon_hyp_brainwash")
+			end
+			if ply:HasWeapon("weapon_vam_fangs") then
+				ply:StripWeapon("weapon_vam_fangs")
+			end
+			if ply:HasWeapon("weapon_zom_claws") then
+				ply:StripWeapon("weapon_zom_claws")
+			end
+			if ply:HasWeapon("weapon_emt_healray") then
+				ply:StripWeapon("weapon_emt_healray")
+			end
+			if ply:HasWeapon("weapon_emt_brainwash") then
+				ply:StripWeapon("weapon_emt_brainwash")
+			end
+		end
+	end
+end
+
+hook.Add("TTTSelectRoles", "Admin_Round_Innocent", InnocentMarkedPlayers)
 
 ---[Identify Corpse Thanks Neku]----------------------------------------------------------------------------
 function ulx.identify( calling_ply, target_ply, unidentify )
@@ -755,7 +1479,7 @@ function ulx.inr( calling_ply, target_ply, amount )
         
         if amount == 0 then
             target_ply:RemovePData("ImpairNR")
-            chat_message = "#A will not impair #T health next round."
+            chat_message = "#T was wrongly convicted. The fine has been removed."
         
         else
             
@@ -765,7 +1489,7 @@ function ulx.inr( calling_ply, target_ply, amount )
             else
                 
                 target_ply:SetPData( "ImpairNR", amount )
-                chat_message = "#A will have #T impaired by " .. amount .. " health next round."
+                chat_message = "#T did the crime and they will pay the fine of " .. amount .. " health next round."
             
             end
         end    
@@ -788,7 +1512,7 @@ local ImpairDamage = tonumber(ply:GetPData("ImpairNR")) or 0
 		local chat_message = ""
 
 		if ImpairDamage > 0 then
-			chat_message = (chat_message .. "You will be impaird by " ..ImpairDamage.. " health this round")
+			chat_message = (chat_message .. "You did the crime and they will pay the fine of " .. ImpairDamage .. " health next round.")
 		end
 		ply:ChatPrint(chat_message)
 	end
@@ -805,9 +1529,9 @@ function ImpairPlayers()
             local name = ply:Nick()
             ply:TakeDamage(impairDamage)
             ply:EmitSound("player/pl_pain5.wav")
-            ply:ChatPrint("You have been impaird by " ..impairDamage.. " health this round")
+            ply:ChatPrint("You did the crime and they have paid the fine of " .. impairDamage .. " health.")
             ply:RemovePData( "ImpairNR" ) 
-            ULib.tsay(nil, name .. " was impaired by ".. impairDamage .." health this round.", false)
+            ULib.tsay(nil, name .. " did the crime and they have paid the fine of " .. impairDamage .. " health.", false)
         end   
 
     end
