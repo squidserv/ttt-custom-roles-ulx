@@ -26,6 +26,12 @@ local function init()
         ULib.replicatedWritableCvar( "ttt_detective_min_players", "rep_ttt_detective_min_players", GetConVarNumber( "ttt_detective_min_players" ), false, false, "xgui_gmsettings" )
         ULib.replicatedWritableCvar( "ttt_detective_karma_min", "rep_ttt_detective_karma_min", GetConVarNumber( "ttt_detective_karma_min" ), false, false, "xgui_gmsettings" )
         
+		--custom roles
+		ULib.replicatedWritableCvar("ttt_mercenary_enabled", "rep_ttt_mercenary_enabled", GetConVarNumber("ttt_mercenary_enabled"), false, false, "xgui_gmsettings")
+		ULib.replicatedWritableCvar("ttt_hypnotist_enabled", "rep_ttt_hypnotist_enabled", GetConVarNumber("ttt_hypnotist_enabled"), false, false, "xgui_gmsettings")
+		ULib.replicatedWritableCvar("ttt_glitch_enabled", "rep_ttt_glitch_enabled", GetConVarNumber("ttt_glitch_enabled"), false, false, "xgui_gmsettings")
+		ULib.replicatedWritableCvar("ttt_jetser_enabled", "rep_ttt_jetser_enabled", GetConVarNumber("ttt_jetser_enabled"), false, false, "xgui_gmsettings")
+		ULib.replicatedWritableCvar("ttt_phantom_enabled", "rep_ttt_phantom_enabled", GetConVarNumber("ttt_phantom_enabled"), false, false, "xgui_gmsettings")
         --dna
         ULib.replicatedWritableCvar( "ttt_killer_dna_range", "rep_ttt_killer_dna_range", GetConVarNumber( "ttt_killer_dna_range" ), false, false, "xgui_gmsettings" )
         ULib.replicatedWritableCvar( "ttt_killer_dna_basetime", "rep_ttt_killer_dna_basetime", GetConVarNumber( "ttt_killer_dna_basetime" ), false, false, "xgui_gmsettings" )

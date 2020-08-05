@@ -170,6 +170,20 @@ gptdlst:AddItem( dmp )
 local dkm = xlib.makeslider{ label="ttt_detective_karma_min (def. 600)", min=1, max=1000, repconvar="rep_ttt_detective_karma_min", parent=gptdlst }
 gptdlst:AddItem( dkm )
 
+local hasmer = xlib.makecheckbox { label = "ttt_mercenary_enabled (def. 1)", repconvar = "rep_ttt_mercenary_enabled", parent = gptdlst }
+gptdlst:AddItem(hasmer)
+
+local hashyp = xlib.makecheckbox { label = "ttt_hypnotist_enabled (def. 1)", repconvar = "rep_ttt_hypnotist_enabled", parent = gptdlst }
+gptdlst:AddItem(hashyp)
+
+local hasgli = xlib.makecheckbox { label = "ttt_glitch_enabled (def. 1)", repconvar = "rep_ttt_glitch_enabled", parent = gptdlst }
+gptdlst:AddItem(hasgli)
+
+local hasjes = xlib.makecheckbox { label = "ttt_jester_enabled (def. 1)", repconvar = "rep_ttt_jester_enabled", parent = gptdlst }
+gptdlst:AddItem(hasjes)
+
+local haspha = xlib.makecheckbox { label = "ttt_phantom_enabled (def. 1)", repconvar = "rep_ttt_phantom_enabled", parent = gptdlst }
+gptdlst:AddItem(haspha)
 --DNA
 local gpdnaclp = vgui.Create( "DCollapsibleCategory", gppnl ) 
 gpdnaclp:SetSize( 390, 45 )
