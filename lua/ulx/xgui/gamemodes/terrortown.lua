@@ -143,13 +143,13 @@ local gppnl = xlib.makelistlayout{ w=415, h=318, parent=xgui.null }
 
 -- Roles Enabled
 local gptreclp = vgui.Create("DCollapsibleCategory", gppnl)
-gptreclp:SetSize(390, 200)
+gptreclp:SetSize(390, 250)
 gptreclp:SetExpanded(1)
 gptreclp:SetLabel("Roles Enabled")
 
 local gptrelst = vgui.Create("DPanelList", gptreclp)
 gptrelst:SetPos(5, 25)
-gptrelst:SetSize(390, 200)
+gptrelst:SetSize(390, 250)
 gptrelst:SetSpacing(5)
 
 local hasmer = xlib.makecheckbox { label = "ttt_mercenary_enabled (def. 1)", repconvar = "rep_ttt_mercenary_enabled", parent = gptrelst }

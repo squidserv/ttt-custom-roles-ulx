@@ -50,7 +50,7 @@ local function init()
 		ULib.replicatedWritableCvar("ttt_swapper_chance", "rep_ttt_swapper_chance", GetConVarNumber("ttt_swapper_chance"), false, false, "xgui_gmsettings")
 		ULib.replicatedWritableCvar("ttt_assassin_chance", "rep_ttt_assassin_chance", GetConVarNumber("ttt_assassin_chance"), false, false, "xgui_gmsettings")
         ULib.replicatedWritableCvar("ttt_killer_chance", "rep_ttt_killer_chance", GetConVarNumber("ttt_killer_chance"), false, false, "xgui_gmsettings")
-		ULib.replicatedWritableCvar("ttt_emt_chance", "rep_ttt_killer_chance", GetConVarNumber("ttt_emt_chance"), false, false, "xgui_gmsettings")
+		ULib.replicatedWritableCvar("ttt_emt_chance", "rep_ttt_emt_chance", GetConVarNumber("ttt_emt_chance"), false, false, "xgui_gmsettings")
 
         --custom role requirements
         ULib.replicatedWritableCvar("ttt_mercenary_required_innos", "rep_ttt_mercenary_required_innos", GetConVarNumber("ttt_mercenary_required_innos"), false, false, "xgui_gmsettings")
