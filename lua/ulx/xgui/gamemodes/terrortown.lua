@@ -188,13 +188,13 @@ gptrelst:AddItem(hasemt)
 
 --Role Counts
 local gptrcclp = vgui.Create("DCollapsibleCategory", gppnl)
-gptrcclp:SetSize(390, 345)
+gptrcclp:SetSize(390, 335)
 gptrcclp:SetExpanded(0)
 gptrcclp:SetLabel("Role Counts")
 
 local gptrclst = vgui.Create("DPanelList", gptrcclp)
 gptrclst:SetPos(5, 25)
-gptrclst:SetSize(390, 345)
+gptrclst:SetSize(390, 335)
 gptrclst:SetSpacing(5)
 
 local tmax = xlib.makeslider { label = "ttt_traitor_max (def. 32)", min = 1, max = 80, repconvar = "rep_ttt_traitor_max", parent = gptrclst }
@@ -226,9 +226,6 @@ gptrclst:AddItem(jreq)
 
 local sreq = xlib.makeslider { label = "ttt_swapper_required_innos (def. 2)", min = 0, max = 50, repconvar = "rep_ttt_swapper_required_innos", parent = gptrclst }
 gptrclst:AddItem(sreq)
-
-local zreq = xlib.makeslider { label = "ttt_zombie_required_traitors (def. 2)", min = 0, max = 50, repconvar = "rep_ttt_zombie_required_traitors", parent = gptrclst }
-gptrclst:AddItem(zreq)
 
 local vreq = xlib.makeslider { label = "ttt_vampire_required_traitors (def. 2)", min = 0, max = 50, repconvar = "rep_ttt_vampire_required_traitors", parent = gptrclst }
 gptrclst:AddItem(vreq)
