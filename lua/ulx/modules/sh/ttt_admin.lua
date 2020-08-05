@@ -42,9 +42,6 @@ ulx.modifiers = {
 @param  {[String]}       message [The message that will be sent.]
 --]]
 
-function SetRole(ply, role)
-    ply:SetRole(role)
-
 function GetRoleStartingCredits(role)
     return (role == ROLE_TRAITOR and GetConVarNumber("ttt_credits_starting")) or
         (role == ROLE_DETECTIVE and GetConVarNumber("ttt_det_credits_starting")) or
